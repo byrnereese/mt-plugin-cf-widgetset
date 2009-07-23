@@ -88,3 +88,5 @@ sub _hdlr_WidgetSetExists {
 }
 
 1;
+
+__END__
