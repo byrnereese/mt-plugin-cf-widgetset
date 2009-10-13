@@ -2,7 +2,7 @@ package MT::Plugin::WidgetSetCF;
 
 use strict;
 use base qw( MT::Plugin );
-our $VERSION = '1.1'; 
+our $VERSION = '1.1.1'; 
 my $plugin = MT::Plugin::WidgetSetCF->new({
    id          => 'WidgetSetCF',
    key         => 'widget-set-cf',
@@ -46,6 +46,13 @@ sub init_registry {
                                                          {sort      => 'name',
                                                           direction => 'ascend',},
                                                         );
+                    if (!@widgetsets) { # The array is empty, so there are no blog-specific widget sets. Grab global widget sets instead!
+                        @widgetsets = MT::Template->load( {blog_id => '0',
+                                                           type    => 'widgetset',},
+                                                          {sort      => 'name',
+                                                           direction => 'ascend',},
+                                                         );
+                    }
                     foreach my $widgetset (@widgetsets) {
                         $html .= '<option<mt:if name="field_value" eq="' . $widgetset->name . '"> selected="selected"</mt:if>>' . $widgetset->name . '</option>';
                     }
@@ -78,6 +85,11 @@ sub _hdlr_WidgetSetExists {
         my $widgetset = MT::Template->load( {blog_id => $blog_id,
                                              type    => 'widgetset',
                                              name    => $set,});
+        if (!$widgetset) { # No blog-specific widget set found--try grabbing a global widget set.
+            $widgetset = MT::Template->load( {blog_id => '0',
+                                              type    => 'widgetset',
+                                              name    => $set,});
+        }
         if ($widgetset->name eq $set) {
             return 1;
         }
